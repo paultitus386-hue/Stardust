@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Magnetic Stardust Heart - A to Z</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #030308;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
+        }
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        .ui-container {
+            position: absolute;
+            top: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            width: calc(100% - 24px);
+            max-width: 540px;
+            pointer-events: none;
+        }
+
+        .instruction-box {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            padding: 6px 16px;
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            font-size: 12px;
+            font-weight: 500;
+            text-align: center;
+            letter-spacing: 0.5px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+            animation: pulseGlow 2.5s infinite alternate;
+        }
+
+        @keyframes pulseGlow {
+            0% { border-color: rgba(255, 255, 255, 0.15); box-shadow: 0 4px 15px rgba(255, 45, 85, 0.2); }
+            100% { border-color: rgba(255, 45, 85, 0.6); box-shadow: 0 6px 25px rgba(255, 45, 85, 0.5); }
+        }
+
+        .controls-panel {
+            pointer-events: auto;
+            background: rgba(15, 12, 28, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 16px;
+            padding: 10px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 100%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+        }
+
+        /* Horizontal Scrollable Alphabet Bar */
+        .alphabet-bar-container {
+            display: flex;
+            align-items: center;
+            position: relative;
+            width: 100%;
+        }
+
+        .alphabet-bar {
+            display: flex;
+            gap: 4px;
+            overflow-x: auto;
+            padding: 4px 2px;
+            width: 100%;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 45, 85, 0.5) transparent;
+        }
+
+        .alphabet-bar::-webkit-scrollbar {
+            height: 4px;
+        }
+        .alphabet-bar::-webkit-scrollbar-thumb {
+            background: rgba(255, 45, 85, 0.5);
+            border-radius: 4px;
+        }
+
+        .btn-letter {
+            flex: 0 0 auto;
+            min-width: 32px;
+            height: 32px;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 13px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            outline: none;
+            padding: 0 6px;
+        }
+
+        .btn-letter:hover {
+            background: rgba(255, 45, 85, 0.3);
+            border-color: rgba(255, 45, 85, 0.6);
+            transform: translateY(-1px);
+        }
+
+        .btn-letter.active {
+            background: linear-gradient(135deg, #ff2d55, #e040fb);
+            border-color: #ffffff;
+            box-shadow: 0 0 12px rgba(255, 45, 85, 0.7);
+            color: #fff;
+        }
+
+        .btn-special {
+            min-width: 44px;
+            font-size: 12px;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .custom-input {
+            flex: 1;
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            padding: 6px 12px;
+            color: #fff;
+            font-size: 13px;
+            outline: none;
+            text-align: center;
+            transition: border 0.2s;
+        }
+
+        .custom-input:focus {
+            border-color: #ff2d55;
+        }
+
+        .btn-action {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 12px;
+            padding: 6px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.2s;
+            outline: none;
+            white-space: nowrap;
+        }
+
+        .btn-action.active {
+            background: linear-gradient(135deg, #00f2fe, #4facfe);
+            border-color: #ffffff;
+            box-shadow: 0 0 10px rgba(0, 242, 254, 0.6);
+        }
+
+        .palette-select {
+            background: rgba(0, 0, 0, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            padding: 6px 8px;
+            color: #fff;
+            font-size: 12px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .palette-select option {
+            background: #120e24;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="ui-container">
+        <div class="instruction-box">
+            ✨ Touch & Hold anywhere to pull Stardust into Heart + Letter ✨
+        </div>
+
+        <div class="controls-panel">
+            <div class="alphabet-bar-container">
+                <div class="alphabet-bar" id="alphabet-bar">
+                    <!-- A-Z and special presets injected dynamically via JS -->
+                </div>
+            </div>
+
+            <div class="input-row">
+                <input type="text" id="text-input" class="custom-input" placeholder="Custom text/initials..." maxlength="6" value="A">
+                <button class="btn-action" id="btn-cycle" title="Auto-cycle through letters every 2.5s">🔄 Cycle A-Z</button>
+                <select id="palette-select" class="palette-select">
+                    <option value="ruby">Ruby Red</option>
+                    <option value="rosegold">Rose Gold</option>
+                    <option value="neon">Neon Pink</option>
+                    <option value="cyan">Electric Cyan</option>
+                    <option value="prism">Prism Rainbow</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <canvas id="canvas"></canvas>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d', { alpha: false });
+
+        let width = canvas.width = window.innerWidth;
+        let height = canvas.height = window.innerHeight;
+
+        const PALETTES = {
+            ruby: ['#ff2d55', '#ff3b30', '#ff9500', '#ffcc00', '#ffffff', '#e040fb'],
+            rosegold: ['#b76e79', '#ffd1dc', '#f7cad0', '#ffb5a7', '#ffffff', '#fcd5ce'],
+            neon: ['#ff007f', '#ff00ff', '#7928ca', '#ffffff', '#e040fb', '#ff0055'],
+            cyan: ['#00f2fe', '#4facfe', '#00c6ff', '#0072ff', '#ffffff', '#70e0d0'],
+            prism: ['#ff0000', '#ff7f00', '#ffff00', '#00ff00', '#0000ff', '#4b0082', '#8b00ff']
+        };
+
+        let currentPalette = PALETTES.ruby;
+
+        const pointer = {
+            x: width / 2,
+            y: height / 2,
+            isPressed: false
+        };
+
+        function updatePointerPos(e) {
+            const rect = canvas.getBoundingClientRect();
+            if (e.touches && e.touches.length > 0) {
+                pointer.x = e.touches[0].clientX - rect.left;
+                pointer.y = e.touches[0].clientY - rect.top;
+            } else {
+                pointer.x = e.clientX - rect.left;
+                pointer.y = e.clientY - rect.top;
+            }
+        }
+
+        window.addEventListener('mousedown', (e) => {
+            if (e.target.closest('.controls-panel')) return;
+            pointer.isPressed = true;
+            updatePointerPos(e);
+        });
+
+        window.addEventListener('mousemove', (e) => {
+            updatePointerPos(e);
+        });
+
+        window.addEventListener('mouseup', () => {
+            pointer.isPressed = false;
+        });
+
+        window.addEventListener('touchstart', (e) => {
+            if (e.target.closest('.controls-panel')) return;
+            pointer.isPressed = true;
+            updatePointerPos(e);
+        }, { passive: true });
+
+        window.addEventListener('touchmove', (e) => {
+            updatePointerPos(e);
+        }, { passive: true });
+
+        window.addEventListener('touchend', () => {
+            pointer.isPressed = false;
+        });
+
+        window.addEventListener('resize', () => {
+            width = canvas.width = window.innerWidth;
+            height = canvas.height = window.innerHeight;
+            generateTextPoints(currentText);
+        });
+
+        const sampleCanvas = document.createElement('canvas');
+        const sampleCtx = sampleCanvas.getContext('2d');
+        let textPoints = [];
+        let currentText = "A";
+
+        function generateTextPoints(text) {
+            if (!text || text.trim() === "") {
+                textPoints = [];
+                return;
+            }
+
+            const size = 220;
+            sampleCanvas.width = size;
+            sampleCanvas.height = size;
+
+            sampleCtx.clearRect(0, 0, size, size);
+            sampleCtx.fillStyle = '#ffffff';
+            
+            // Dynamic font resizing for length adaptability
+            let fontSize = 110;
+            if (text.length === 2) fontSize = 85;
+            if (text.length === 3) fontSize = 68;
+            if (text.length >= 4) fontSize = 52;
+
+            sampleCtx.font = `bold ${fontSize}px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif`;
+            sampleCtx.textAlign = 'center';
+            sampleCtx.textBaseline = 'middle';
+            
+            sampleCtx.fillText(text, size / 2, size / 2);
+
+            const imgData = sampleCtx.getImageData(0, 0, size, size).data;
+            textPoints = [];
+
+            const step = text.length > 3 ? 3 : 2;
+            for (let y = 0; y < size; y += step) {
+                for (let x = 0; x < size; x += step) {
+                    const alpha = imgData[(y * size + x) * 4 + 3];
+                    if (alpha > 128) {
+                        textPoints.push({
+                            x: (x - size / 2) / (size / 2),
+                            y: (y - size / 2) / (size / 2)
+                        });
+                    }
+                }
+            }
+        }
+
+        const PARTICLE_COUNT = 1300;
+        
+        const posX = new Float32Array(PARTICLE_COUNT);
+        const posY = new Float32Array(PARTICLE_COUNT);
+        const velX = new Float32Array(PARTICLE_COUNT);
+        const velY = new Float32Array(PARTICLE_COUNT);
+        const sizeArr = new Float32Array(PARTICLE_COUNT);
+        const colorArr = [];
+        const paramT = new Float32Array(PARTICLE_COUNT);
+        const isInnerArr = new Uint8Array(PARTICLE_COUNT);
+
+        function initParticles() {
+            for (let i = 0; i < PARTICLE_COUNT; i++) {
+                posX[i] = Math.random() * width;
+                posY[i] = Math.random() * height;
+                velX[i] = (Math.random() - 0.5) * 1.5;
+                velY[i] = (Math.random() - 0.5) * 1.5;
+                sizeArr[i] = Math.random() * 2.2 + 1.0;
+                colorArr[i] = currentPalette[Math.floor(Math.random() * currentPalette.length)];
+                paramT[i] = (i / PARTICLE_COUNT) * Math.PI * 2;
+                
+                // ~45% allocated to letter structure, ~55% to heart perimeter
+                isInnerArr[i] = (i % 10 < 4.5) ? 1 : 0;
+            }
+        }
+
+        function refreshParticleColors() {
+            for (let i = 0; i < PARTICLE_COUNT; i++) {
+                colorArr[i] = currentPalette[Math.floor(Math.random() * currentPalette.length)];
+            }
+        }
+
+        const alphabetBar = document.getElementById('alphabet-bar');
+        const textInput = document.getElementById('text-input');
+        const cycleButton = document.getElementById('btn-cycle');
+        const paletteSelect = document.getElementById('palette-select');
+
+        // Full Alphabet list + Special Symbols
+        const ALPHABET_LIST = [];
+        for (let i = 65; i <= 90; i++) {
+            ALPHABET_LIST.push(String.fromCharCode(i));
+        }
+        const SPECIAL_PRESETS = ["❤️", "LOVE"];
+        const ALL_PRESETS = [...ALPHABET_LIST, ...SPECIAL_PRESETS];
+
+        function buildAlphabetUI() {
+            ALL_PRESETS.forEach(item => {
+                const btn = document.createElement('button');
+                btn.className = 'btn-letter' + (item.length > 1 || item === "❤️" ? ' btn-special' : '');
+                btn.dataset.val = item;
+                btn.textContent = item;
+                if (item === "A") btn.classList.add('active');
+
+                btn.addEventListener('click', () => {
+                    stopCycle();
+                    setActiveText(item);
+                    
+                    // Scroll button into smooth center view
+                    btn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                });
+
+                alphabetBar.appendChild(btn);
+            });
+        }
+
+        let cycleInterval = null;
+        let cycleIndex = 0;
+
+        function setActiveText(val) {
+            currentText = val;
+            textInput.value = val;
+            generateTextPoints(val);
+
+            // Highlight corresponding letter button in selector
+            document.querySelectorAll('.btn-letter').forEach(btn => {
+                if (btn.dataset.val === val) {
+                    btn.classList.add('active');
+                } else {
+                    btn.classList.remove('active');
+                }
+            });
+        }
+
+        textInput.addEventListener('input', (e) => {
+            stopCycle();
+            setActiveText(e.target.value.toUpperCase());
+        });
+
+        paletteSelect.addEventListener('change', (e) => {
+            currentPalette = PALETTES[e.target.value] || PALETTES.ruby;
+            refreshParticleColors();
+        });
+
+        function toggleCycle() {
+            if (cycleInterval) {
+                stopCycle();
+            } else {
+                cycleButton.classList.add('active');
+                cycleInterval = setInterval(() => {
+                    cycleIndex = (cycleIndex + 1) % ALPHABET_LIST.length;
+                    const letter = ALPHABET_LIST[cycleIndex];
+                    setActiveText(letter);
+
+                    // Auto-scroll alphabet bar during cycle
+                    const btn = document.querySelector(`.btn-letter[data-val="${letter}"]`);
+                    if (btn) {
+                        btn.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                    }
+                }, 2500);
+            }
+        }
+
+        function stopCycle() {
+            if (cycleInterval) {
+                clearInterval(cycleInterval);
+                cycleInterval = null;
+                cycleButton.classList.remove('active');
+            }
+        }
+
+        cycleButton.addEventListener('click', toggleCycle);
+
+        // Build UI & initialize engine
+        buildAlphabetUI();
+        generateTextPoints("A");
+        initParticles();
+
+        function animate() {
+            // Dark cosmic trailing effect
+            ctx.fillStyle = 'rgba(3, 3, 8, 0.28)';
+            ctx.fillRect(0, 0, width, height);
+
+            ctx.globalCompositeOperation = 'lighter';
+
+            const baseRadius = Math.min(width, height) / 38;
+            const hasTextPoints = textPoints.length > 0;
+
+            for (let i = 0; i < PARTICLE_COUNT; i++) {
+                if (pointer.isPressed) {
+                    let targetX = pointer.x;
+                    let targetY = pointer.y;
+
+                    // Compute inner text assignment vs parametric heart curve
+                    if (isInnerArr[i] && hasTextPoints) {
+                        const pt = textPoints[i % textPoints.length];
+                        const textScale = baseRadius * 11;
+                        targetX += pt.x * textScale;
+                        targetY += pt.y * textScale + (baseRadius * 0.8);
+                    } else {
+                        // Parametric Heart Equation
+                        const t = paramT[i];
+                        const sinT = Math.sin(t);
+                        const rawX = 16 * sinT * sinT * sinT;
+                        const rawY = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
+
+                        targetX += rawX * baseRadius;
+                        targetY += rawY * baseRadius;
+                    }
+
+                    // Magnetic pull vector towards touch point
+                    const dx = targetX - posX[i];
+                    const dy = targetY - posY[i];
+
+                    velX[i] += dx * 0.045;
+                    velY[i] += dy * 0.045;
+
+                    // Velocity Damping
+                    velX[i] *= 0.80;
+                    velY[i] *= 0.80;
+
+                    // Micro-shimmer
+                    velX[i] += (Math.random() - 0.5) * 0.4;
+                    velY[i] += (Math.random() - 0.5) * 0.4;
+                } else {
+                    // Idle floating stardust drift
+                    velX[i] += (Math.random() - 0.5) * 0.12;
+                    velY[i] += (Math.random() - 0.5) * 0.12;
+
+                    velX[i] *= 0.98;
+                    velY[i] *= 0.98;
+
+                    // Wrap edges
+                    if (posX[i] < 0) posX[i] = width;
+                    if (posX[i] > width) posX[i] = 0;
+                    if (posY[i] < 0) posY[i] = height;
+                    if (posY[i] > height) posY[i] = 0;
+                }
+
+                // Update particle positions
+                posX[i] += velX[i];
+                posY[i] += velY[i];
+
+                // Render glowing stardust
+                ctx.fillStyle = colorArr[i];
+                ctx.beginPath();
+                ctx.arc(posX[i], posY[i], sizeArr[i], 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            ctx.globalCompositeOperation = 'source-over';
+
+            requestAnimationFrame(animate);
+        }
+
+        // Run animation loop
+        animate();
+    </script>
+</body>
+</html>
